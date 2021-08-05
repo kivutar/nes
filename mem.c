@@ -20,7 +20,7 @@ nope(int p)
 }
 
 static void
-nrom(int p, u8int)
+nrom(int p, u8int v)
 {
 	if(p >= 0)
 		return;
@@ -325,12 +325,12 @@ axrom(int p, u8int v)
 }
 
 void (*mapper[256])(int, u8int) = {
-	[0] nrom,
-	[1] mmc1,
-	[2] uxrom,
-	[3] cnrom,
-	[4] mmc3,
-	[7] axrom,
+	[0] = nrom,
+	[1] = mmc1,
+	[2] = uxrom,
+	[3] = cnrom,
+	[4] = mmc3,
+	[7] = axrom,
 };
 
 static void

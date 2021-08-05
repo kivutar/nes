@@ -9,6 +9,7 @@
 #include "dat.h"
 #include "fns.h"
 
+static retro_input_state_t input_state_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_video_refresh_t video_cb;
 static retro_environment_t environ_cb;
@@ -21,7 +22,7 @@ int oflag, savefd = -1;
 int mirr;
 
 int
-readn(void *f, void *data, int len)
+readn(int f, void *data, int len)
 {
 	uchar *p, *e;
 
@@ -57,7 +58,7 @@ flushram(void)
 }
 
 void
-loadrom(char *file, int sflag)
+loadrom(const char *file, int sflag)
 {
 	int fd;
 	int nes20;
@@ -68,22 +69,22 @@ loadrom(char *file, int sflag)
 	
 	fd = open(file, OREAD);
 	if(fd < 0)
-		sysfatal("open: %r");
+		sysfatal("open\n");
 	if(readn(fd, header, sizeof(header)) < sizeof(header))
-		sysfatal("read: %r");
+		sysfatal("read\n");
 	if(memcmp(header, "NES\x1a", 4) != 0)
-		sysfatal("not a ROM");
+		sysfatal("not a ROM\n");
 	if(header[15] != 0)
 		memset(header + 7, 0, 9);
 	flags = header[6] | header[7] << 8;
 	nes20 = (flags & FLNES20M) == FLNES20V;
 	if(flags & (FLVS | FLPC10))
-		sysfatal("ROM not supported");
+		sysfatal("ROM not supported\n");
 	nprg = header[HPRG];
 	if(nes20)
 		nprg |= (header[HROMH] & 0xf) << 8;
 	if(nprg == 0)
-		sysfatal("invalid ROM");
+		sysfatal("invalid ROM\n");
 	nchr = header[HCHR];
 	if(nes20)
 		nchr |= (header[HROMH] & 0xf0) << 4;
@@ -91,28 +92,28 @@ loadrom(char *file, int sflag)
 	if(nes20)
 		map |= (header[8] & 0x0f) << 8;
 	if(map >= 256 || mapper[map] == nil)
-		sysfatal("unimplemented mapper %d", map);
+		sysfatal("unimplemented mapper %d\n", map);
 
 	memset(mem, 0, sizeof(mem));
 	if((flags & FLTRAINER) != 0 && readn(fd, mem + 0x7000, 512) < 512)
-			sysfatal("read: %r");
+			sysfatal("read\n");
 	prg = malloc(nprg * PRGSZ);
 	if(prg == nil)
-		sysfatal("malloc: %r");
+		sysfatal("malloc\n");
 	if(readn(fd, prg, nprg * PRGSZ) < nprg * PRGSZ)
-		sysfatal("read: %r");
+		sysfatal("read\n");
 	chrram = nchr == 0;
 	if(nchr != 0){
 		chr = malloc(nchr * CHRSZ);
 		if(chr == nil)
-			sysfatal("malloc: %r");
+			sysfatal("malloc\n");
 		if(readn(fd, chr, nchr * CHRSZ) < nchr * CHRSZ)
-			sysfatal("read: %r");
+			sysfatal("read\n");
 	}else{
 		nchr = 1;
 		chr = malloc(nchr * CHRSZ);
 		if(chr == nil)
-			sysfatal("malloc: %r");
+			sysfatal("malloc\n");
 	}
 	if((flags & FLFOUR) != 0)
 		mirr = MFOUR;
@@ -337,13 +338,23 @@ retro_run(void)
 		if(saveclock <= 0)
 			flushram();
 	}
-
 	video_cb(pic, 256, 240, 256*4);
+}
+
+void
+flush(void)
+{
+	//video_cb(pic, 256, 240, 256*4);
 }
 
 void
 retro_set_input_poll(retro_input_poll_t cb) {
 	input_poll_cb = cb;
+}
+
+void
+retro_set_input_state(retro_input_state_t cb) {
+	input_state_cb = cb;
 }
 
 void
@@ -365,7 +376,6 @@ void retro_unload_game(void) {}
 void retro_deinit(void) {}
 void retro_set_audio_sample(retro_audio_sample_t cb) {}
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) {}
-void retro_set_input_state(retro_input_state_t cb) {}
 size_t retro_serialize_size(void) { return 0; }
 bool retro_serialize(void *data, size_t size) { return false; }
 bool retro_unserialize(const void *data, size_t size) { return false; }

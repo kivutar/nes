@@ -292,7 +292,7 @@ retro_run(void)
 {
 	input_poll_cb();
 
-	for (;!doflush;) {
+	while(!doflush){
 		if(savereq){
 			savestate("nes.save");
 			savereq = 0;
@@ -301,10 +301,6 @@ retro_run(void)
 			loadstate("nes.save");
 			loadreq = 0;
 		}
-		// if(paused){
-		// 	qlock(&pauselock);
-		// 	qunlock(&pauselock);
-		// }
 		t = step() * 12;
 		clock += t;
 		ppuclock += t;

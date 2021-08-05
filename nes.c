@@ -20,6 +20,7 @@ uchar *prg, *chr;
 int clock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock, msgclock, saveclock;
 int oflag, savefd = -1;
 int mirr;
+int doflush = 0;
 
 int
 readn(int f, void *data, int len)
@@ -291,60 +292,63 @@ retro_run(void)
 {
 	input_poll_cb();
 
-	if(savereq){
-		savestate("nes.save");
-		savereq = 0;
-	}
-	if(loadreq){
-		loadstate("nes.save");
-		loadreq = 0;
-	}
-	// if(paused){
-	// 	qlock(&pauselock);
-	// 	qunlock(&pauselock);
-	// }
-	t = step() * 12;
-	clock += t;
-	ppuclock += t;
-	apuclock += t;
-	sampclock += t;
-	dmcclock += t;
-	while(ppuclock >= 4){
-		ppustep();
-		ppuclock -= 4;
-	}
-	if(apuclock >= APUDIV){
-		apustep();
-		apuclock -= APUDIV;
-	}
-	if(sampclock >= SAMPDIV){
-		audiosample();
-		sampclock -= SAMPDIV;
-	}
-	if(dmcclock >= dmcfreq){
-		dmcstep();
-		dmcclock -= dmcfreq;
-	}
-	/*if(msgclock > 0){
-		msgclock -= t;
-		if(msgclock <= 0){
-			extern Image *bg;
-			draw(screen, screen->r, bg, nil, ZP);	
-			msgclock = 0;
+	for (;!doflush;) {
+		if(savereq){
+			savestate("nes.save");
+			savereq = 0;
 		}
-	}*/
-	if(saveclock > 0){
-		saveclock -= t;
-		if(saveclock <= 0)
-			flushram();
+		if(loadreq){
+			loadstate("nes.save");
+			loadreq = 0;
+		}
+		// if(paused){
+		// 	qlock(&pauselock);
+		// 	qunlock(&pauselock);
+		// }
+		t = step() * 12;
+		clock += t;
+		ppuclock += t;
+		apuclock += t;
+		sampclock += t;
+		dmcclock += t;
+		while(ppuclock >= 4){
+			ppustep();
+			ppuclock -= 4;
+		}
+		if(apuclock >= APUDIV){
+			apustep();
+			apuclock -= APUDIV;
+		}
+		if(sampclock >= SAMPDIV){
+			audiosample();
+			sampclock -= SAMPDIV;
+		}
+		if(dmcclock >= dmcfreq){
+			dmcstep();
+			dmcclock -= dmcfreq;
+		}
+		/*if(msgclock > 0){
+			msgclock -= t;
+			if(msgclock <= 0){
+				extern Image *bg;
+				draw(screen, screen->r, bg, nil, ZP);
+				msgclock = 0;
+			}
+		}*/
+		if(saveclock > 0){
+			saveclock -= t;
+			if(saveclock <= 0)
+				flushram();
+		}
 	}
 	video_cb(pic, 256, 240, 256*4);
+	doflush = 0;
 }
 
 void
 flush(void)
 {
-	//video_cb(pic, 256, 240, 256*4);
+	doflush = 1;
 }
 
 void

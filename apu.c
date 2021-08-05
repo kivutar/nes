@@ -1,8 +1,7 @@
-#include <u.h>
-#include <libc.h>
-#include <thread.h>
-#include <draw.h>
-#include "../eui.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include "u.h"
+#include "compat.h"
 #include "dat.h"
 #include "fns.h"
 
@@ -21,6 +20,37 @@ u8int apuseq, apuctr[13];
 u16int dmcaddr, dmccnt;
 static int fd;
 static short sbuf[2*MAXBUF], *sbufp;
+
+ulong
+umuldiv(ulong a, ulong b, ulong c)
+{
+	return ((uvlong)a * (uvlong)b) / c;
+}
+
+long
+muldiv(long a, long b, long c)
+{
+	int s;
+	long v;
+
+	s = 0;
+	if(a < 0) {
+		s = !s;
+		a = -a;
+	}
+	if(b < 0) {
+		s = !s;
+		b = -b;
+	}
+	if(c < 0) {
+		s = !s;
+		c = -c;
+	}
+	v = umuldiv(a, b, c);
+	if(s)
+		v = -v;
+	return v;
+}
 
 int
 targperiod(int i)

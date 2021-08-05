@@ -1,5 +1,5 @@
-#include <u.h>
-#include <libc.h>
+#include "u.h"
+#include "compat.h"
 #include "dat.h"
 #include "fns.h"
 

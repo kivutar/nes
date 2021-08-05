@@ -1,8 +1,6 @@
-#include <u.h>
-#include <libc.h>
-#include <thread.h>
-#include <draw.h>
-#include "../eui.h"
+#include <strings.h>
+#include "u.h"
+#include "compat.h"
 #include "dat.h"
 #include "fns.h"
 

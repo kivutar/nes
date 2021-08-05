@@ -1,9 +1,5 @@
-#include <u.h>
-#include <libc.h>
-#include <thread.h>
-#include <draw.h>
-#include <mouse.h>
-#include "../eui.h"
+#include "u.h"
+#include "compat.h"
 #include "dat.h"
 #include "fns.h"
 
@@ -49,31 +45,14 @@ pixel(int x, int y, int val, int back)
 	u.c[1] = palgreen[val];
 	u.c[2] = palred[val];
 	u.c[3] = back ? 0 : 0xFF;
-	p = (u32int *)pic + y * 256 * scale + x * scale;
-	switch(scale){
-	case 16: *p++ = u.l;
-	case 15: *p++ = u.l;
-	case 14: *p++ = u.l;
-	case 13: *p++ = u.l;
-	case 12: *p++ = u.l;
-	case 11: *p++ = u.l;
-	case 10: *p++ = u.l;
-	case 9: *p++ = u.l;
-	case 8: *p++ = u.l;
-	case 7: *p++ = u.l;
-	case 6: *p++ = u.l;
-	case 5: *p++ = u.l;
-	case 4: *p++ = u.l;
-	case 3: *p++ = u.l;
-	case 2: *p++ = u.l;
-	default: *p = u.l;
-	}
+	p = (u32int *)pic + y * 256 + x;
+	*p = u.l;
 }
 
 static int
 iscolor(int x, int y)
 {
-	return pic[(scale * 4) * (y * 256 + x) + 3] != 0;
+	return pic[4 * (y * 256 + x) + 3] != 0;
 }
 
 static int
@@ -250,15 +229,15 @@ drawsprites(int show)
 static void
 flush(void)
 {
-	flushmouse(1);
-	flushscreen();
-	flushaudio(audioout);
+	// flushmouse(1);
+	// flushscreen();
+	// flushaudio(audioout);
 }
 
 void
 ppustep(void)
 {
-	extern int nmi;
+	extern u8int nmi;
 	int mask;
 
 	if(ppuy < 240 || ppuy == 261){

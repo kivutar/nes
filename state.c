@@ -1,7 +1,7 @@
-#include <u.h>
-#include <libc.h>
-#include <thread.h>
-#include <draw.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include "u.h"
+#include "compat.h"
 #include "dat.h"
 #include "fns.h"
 
@@ -65,7 +65,7 @@ loadstate(char *file)
 {
 	fd = open(file, OREAD);
 	if(fd < 0){
-		message("open: %r");
+		//message("open: %r");
 		return;
 	}
 	read(fd, mem, sizeof(mem));
@@ -105,9 +105,9 @@ loadstate(char *file)
 void
 savestate(char *file)
 {
-	fd = create(file, ORDWR, 0666);
+	fd = -1; //create(file, ORDWR, 0666);
 	if(fd < 0){
-		message("create: %r");
+		//message("create: %r");
 		return;
 	}
 	write(fd, mem, sizeof(mem));

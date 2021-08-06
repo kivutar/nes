@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "u.h"
 #include "compat.h"
 
@@ -30,4 +31,19 @@ muldiv(long a, long b, long c)
 	if(s)
 		v = -v;
 	return v;
+}
+
+int
+readn(int f, void *data, int len)
+{
+	uchar *p, *e;
+
+	p = data;
+	e = p + len;
+	while(p < e){
+		if((len = read(f, p, e - p)) <= 0)
+			break;
+		p += len;
+	}
+	return p - (uchar*)data;
 }

@@ -12,7 +12,7 @@ u16int pput, ppuv;
 u8int ppusx, vrambuf;
 int vramlatch = 1, keylatch = 0xFF, keylatch2 = 0xFF;
 int prgsh, chrsh, mmc3hack;
-u64int keys, keys2;
+extern u64int keys, keys2;
 
 static void
 nope(int p)

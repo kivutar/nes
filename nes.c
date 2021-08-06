@@ -24,6 +24,7 @@ int mirr;
 int doflush = 0;
 uchar *pic;
 int savereq, loadreq;
+u64int keys, keys2;
 
 /*void
 message(char *fmt, ...)
@@ -180,10 +181,32 @@ retro_load_game(const struct retro_game_info *game)
 	return true;
 }
 
+static const int bind[] = {
+	[RETRO_DEVICE_ID_JOYPAD_B] = 1<<1, // B
+	[RETRO_DEVICE_ID_JOYPAD_Y] = 0, // NOTHING
+	[RETRO_DEVICE_ID_JOYPAD_SELECT] = 1<<2, // CONTROL
+	[RETRO_DEVICE_ID_JOYPAD_START] = 1<<3, // START
+	[RETRO_DEVICE_ID_JOYPAD_UP] = 1<<4, // UP
+	[RETRO_DEVICE_ID_JOYPAD_DOWN] = 1<<5, // DOWN
+	[RETRO_DEVICE_ID_JOYPAD_LEFT] = 1<<6, // LEFT
+	[RETRO_DEVICE_ID_JOYPAD_RIGHT] = 1<<7, // RIGHT
+	[RETRO_DEVICE_ID_JOYPAD_A] = 1<<0, // BUTTON_B
+};
+
+void
+process_inputs()
+{
+	keys = 0;
+	for(int id = 0; id < RETRO_DEVICE_ID_JOYPAD_X; id++)
+		if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, id))
+			keys ^= bind[id];
+}
+
 void
 retro_run(void)
 {
 	input_poll_cb();
+	process_inputs();
 
 	while(!doflush){
 		if(savereq){

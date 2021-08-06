@@ -71,22 +71,22 @@ loadrom(const char *file, int sflag)
 	
 	fd = open(file, OREAD);
 	if(fd < 0)
-		sysfatal("open\n");
+		sysfatal("open");
 	if(readn(fd, header, sizeof(header)) < sizeof(header))
-		sysfatal("read\n");
+		sysfatal("read");
 	if(memcmp(header, "NES\x1a", 4) != 0)
-		sysfatal("not a ROM\n");
+		sysfatal("not a ROM");
 	if(header[15] != 0)
 		memset(header + 7, 0, 9);
 	flags = header[6] | header[7] << 8;
 	nes20 = (flags & FLNES20M) == FLNES20V;
 	if(flags & (FLVS | FLPC10))
-		sysfatal("ROM not supported\n");
+		sysfatal("ROM not supported");
 	nprg = header[HPRG];
 	if(nes20)
 		nprg |= (header[HROMH] & 0xf) << 8;
 	if(nprg == 0)
-		sysfatal("invalid ROM\n");
+		sysfatal("invalid ROM");
 	nchr = header[HCHR];
 	if(nes20)
 		nchr |= (header[HROMH] & 0xf0) << 4;
@@ -94,28 +94,28 @@ loadrom(const char *file, int sflag)
 	if(nes20)
 		map |= (header[8] & 0x0f) << 8;
 	if(map >= 256 || mapper[map] == nil)
-		sysfatal("unimplemented mapper %d\n", map);
+		sysfatal("unimplemented mapper %d", map);
 
 	memset(mem, 0, sizeof(mem));
 	if((flags & FLTRAINER) != 0 && readn(fd, mem + 0x7000, 512) < 512)
-			sysfatal("read\n");
+			sysfatal("read");
 	prg = malloc(nprg * PRGSZ);
 	if(prg == nil)
-		sysfatal("malloc\n");
+		sysfatal("malloc");
 	if(readn(fd, prg, nprg * PRGSZ) < nprg * PRGSZ)
-		sysfatal("read\n");
+		sysfatal("read");
 	chrram = nchr == 0;
 	if(nchr != 0){
 		chr = malloc(nchr * CHRSZ);
 		if(chr == nil)
-			sysfatal("malloc\n");
+			sysfatal("malloc");
 		if(readn(fd, chr, nchr * CHRSZ) < nchr * CHRSZ)
-			sysfatal("read\n");
+			sysfatal("read");
 	}else{
 		nchr = 1;
 		chr = malloc(nchr * CHRSZ);
 		if(chr == nil)
-			sysfatal("malloc\n");
+			sysfatal("malloc");
 	}
 	if((flags & FLFOUR) != 0)
 		mirr = MFOUR;

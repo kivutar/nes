@@ -1,6 +1,15 @@
-SHARED := -dynamiclib
-TARGET := nes_libretro.dylib
-CFLAGS += -O3
+SHARED := -shared
+TARGET := nes_libretro.so
+
+ifeq ($(shell uname -s),) # win
+	SHARED := -shared
+	TARGET := nes_libretro.dll
+else ifneq ($(findstring Darwin,$(shell uname -s)),) # osx
+	SHARED := -dynamiclib
+	TARGET := nes_libretro.dylib
+endif
+
+CFLAGS += -O3 -fPIC -flto
 
 OBJ = cpu.o mem.o ppu.o state.o apu.o nes.o compat.o
 
@@ -8,7 +17,7 @@ OBJ = cpu.o mem.o ppu.o state.o apu.o nes.o compat.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(TARGET): $(OBJ)
-	$(CC) $(SHARED) -fPIC -flto -o $@ $^ $(CFLAGS)
+	$(CC) $(SHARED) -o $@ $^ $(CFLAGS)
 
 clean:
 	rm $(OBJ) $(TARGET)

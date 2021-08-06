@@ -1,4 +1,4 @@
-#include <strings.h>
+#include <string.h>
 #include "u.h"
 #include "compat.h"
 #include "dat.h"

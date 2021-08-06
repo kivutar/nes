@@ -15,8 +15,3 @@ ulong umuldiv(ulong a, ulong b, ulong c);
 long muldiv(long a, long b, long c);
 
 int readn(int f, void *data, int len);
-
-u64int keys, keys2;
-int trace;
-int savereq, loadreq;
-uchar *pic;

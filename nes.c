@@ -22,6 +22,8 @@ int clock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock, msgclock, saveclock
 int oflag, savefd = -1;
 int mirr;
 int doflush = 0;
+uchar *pic;
+int savereq, loadreq;
 
 /*void
 message(char *fmt, ...)

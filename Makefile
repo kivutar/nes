@@ -8,7 +8,7 @@ OBJ = cpu.o mem.o ppu.o state.o apu.o nes.o compat.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(TARGET): $(OBJ)
-	$(CC) $(SHARED) -fPIC -o $@ $^ $(CFLAGS)
+	$(CC) $(SHARED) -fPIC -flto -o $@ $^ $(CFLAGS)
 
 clean:
-	rm *.o nes_libretro.*
+	rm $(OBJ) $(TARGET)

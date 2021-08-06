@@ -13,6 +13,7 @@ static retro_input_state_t input_state_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_video_refresh_t video_cb;
 static retro_environment_t environ_cb;
+retro_audio_sample_batch_t audio_cb;
 
 extern uchar ppuram[16384];
 int nprg, nchr, map, chrram;
@@ -140,102 +141,6 @@ loadrom(const char *file, int sflag)
 	mapper[map](INIT, 0);
 }
 
-/*void
-usage(void)
-{
-	fprint(2, "usage: %s [-aos] [-x scale] rom\n", argv0);
-	exits("usage");
-}
-
-void
-threadmain(int argc, char **argv)
-{
-	int t, sflag;
-
-	sflag = 0;
-	ARGBEGIN {
-	case 'a':
-		initaudio();
-		break;
-	case 'o':
-		oflag = 1;
-		break;
-	case 's':
-		sflag = 1;
-		break;
-	case 'x':
-		fixscale = strtol(EARGF(usage()), nil, 0);
-		break;
-	default:
-		usage();
-	} ARGEND;
-	if(argc < 1)
-		usage();
-	loadrom(argv[0], sflag);
-	initemu(256, 240 - oflag * 16, 4, XRGB32, 1, nil);
-	regkey("b", 'z', 1<<1);
-	regkey("a", 'x', 1<<0);
-	regkey("control", Kshift, 1<<2);
-	regkey("start", '\n', 1<<3);
-	regkey("up", Kup, 1<<4);
-	regkey("down", Kdown, 1<<5);
-	regkey("left", Kleft, 1<<6);
-	regkey("right", Kright, 1<<7);
-
-	pc = memread(0xFFFC) | memread(0xFFFD) << 8;
-	rP = FLAGI;
-	dmcfreq = 12 * 428;
-	for(;;){
-		if(savereq){
-			savestate("nes.save");
-			savereq = 0;
-		}
-		if(loadreq){
-			loadstate("nes.save");
-			loadreq = 0;
-		}
-		if(paused){
-			qlock(&pauselock);
-			qunlock(&pauselock);
-		}
-		t = step() * 12;
-		clock += t;
-		ppuclock += t;
-		apuclock += t;
-		sampclock += t;
-		dmcclock += t;
-		while(ppuclock >= 4){
-			ppustep();
-			ppuclock -= 4;
-		}
-		if(apuclock >= APUDIV){
-			apustep();
-			apuclock -= APUDIV;
-		}
-		if(sampclock >= SAMPDIV){
-			audiosample();
-			sampclock -= SAMPDIV;
-		}
-		if(dmcclock >= dmcfreq){
-			dmcstep();
-			dmcclock -= dmcfreq;
-		}
-		if(msgclock > 0){
-			msgclock -= t;
-			if(msgclock <= 0){
-				extern Image *bg;
-				draw(screen, screen->r, bg, nil, ZP);	
-				msgclock = 0;
-			}
-		}
-		if(saveclock > 0){
-			saveclock -= t;
-			if(saveclock <= 0)
-				flushram();
-		}
-	}
-}*/
-
 int t;
 
 void
@@ -280,6 +185,7 @@ retro_load_game(const struct retro_game_info *game)
 		return false;
 
 	pic = malloc(256 * 240 * 4);
+	initaudio();
 	loadrom(game->path, 0);
 	pc = memread(0xFFFC) | memread(0xFFFD) << 8;
 	rP = FLAGI;
@@ -338,6 +244,7 @@ retro_run(void)
 		}
 	}
 	video_cb(pic, 256, 240, 256*4);
+	audioout();
 	doflush = 0;
 }
 
@@ -348,12 +255,14 @@ flush(void)
 }
 
 void
-retro_set_input_poll(retro_input_poll_t cb) {
+retro_set_input_poll(retro_input_poll_t cb)
+{
 	input_poll_cb = cb;
 }
 
 void
-retro_set_input_state(retro_input_state_t cb) {
+retro_set_input_state(retro_input_state_t cb)
+{
 	input_state_cb = cb;
 }
 
@@ -364,8 +273,15 @@ retro_set_video_refresh(retro_video_refresh_t cb)
 }
 
 void
-retro_set_environment(retro_environment_t cb) {
+retro_set_environment(retro_environment_t cb)
+{
 	environ_cb = cb;
+}
+
+void
+retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
+{
+    audio_cb = cb;
 }
 
 void retro_set_controller_port_device(unsigned port, unsigned device) {}
@@ -375,7 +291,6 @@ void retro_reset(void) {}
 void retro_unload_game(void) {}
 void retro_deinit(void) {}
 void retro_set_audio_sample(retro_audio_sample_t cb) {}
-void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) {}
 size_t retro_serialize_size(void) { return 0; }
 bool retro_serialize(void *data, size_t size) { return false; }
 bool retro_unserialize(const void *data, size_t size) { return false; }

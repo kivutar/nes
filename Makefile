@@ -4,6 +4,9 @@ TARGET := nes_libretro.so
 ifeq ($(shell uname -s),) # win
 	SHARED := -shared
 	TARGET := nes_libretro.dll
+else ifneq ($(findstring MINGW,$(shell uname -s)),) # win
+	SHARED := -shared
+	TARGET := nes_libretro.dll
 else ifneq ($(findstring Darwin,$(shell uname -s)),) # osx
 	SHARED := -dynamiclib
 	TARGET := nes_libretro.dylib

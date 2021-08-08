@@ -14,7 +14,7 @@ extern int nprg, nchr, map, chrram;
 extern u8int apuseq, apuctr[13];
 extern u16int dmcaddr, dmccnt;
 
-extern int clock, ppuclock, apuclock, dmcclock, dmcfreq, saveclock;
+extern int cpuclock, ppuclock, apuclock, dmcclock, dmcfreq, saveclock;
 
 extern void (*mapper[])(int, u8int);
 

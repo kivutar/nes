@@ -238,7 +238,7 @@ interrupt(int nmi, int brk)
 int trace;
 
 int
-step(void)
+cpustep(void)
 {
 	u8int op;
 	u16int a, v;

@@ -91,7 +91,7 @@ loadstate(char *file)
 	keylatch[0] = get8();
 	keylatch[1] = get8();
 	vrambuf = get8();
-	clock = get32();
+	cpuclock = get32();
 	ppuclock = get32();
 	apuclock = get32();
 	apuseq = get8();
@@ -133,7 +133,7 @@ savestate(char *file)
 	put8(keylatch[0]);
 	put8(keylatch[1]);
 	put8(vrambuf);
-	put32(clock);
+	put32(cpuclock);
 	put32(ppuclock);
 	put32(apuclock);
 	put8(apuseq);

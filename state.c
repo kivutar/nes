@@ -88,8 +88,8 @@ loadstate(char *file)
 	mirr = get8();
 	odd = get8();
 	vramlatch = get8();
-	keylatch = get8();
-	keylatch2 = get8();
+	keylatch[0] = get8();
+	keylatch[1] = get8();
 	vrambuf = get8();
 	clock = get32();
 	ppuclock = get32();
@@ -130,8 +130,8 @@ savestate(char *file)
 	put8(mirr);
 	put8(odd);
 	put8(vramlatch);
-	put8(keylatch);
-	put8(keylatch2);
+	put8(keylatch[0]);
+	put8(keylatch[1]);
 	put8(vrambuf);
 	put32(clock);
 	put32(ppuclock);

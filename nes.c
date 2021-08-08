@@ -24,7 +24,7 @@ int mirr;
 int doflush = 0;
 uchar *pic;
 int savereq, loadreq;
-u64int keys, keys2;
+u16int keys[2];
 
 /*void
 message(char *fmt, ...)
@@ -196,10 +196,13 @@ static const int bind[] = {
 void
 process_inputs()
 {
-	keys = 0;
-	for(int id = 0; id < RETRO_DEVICE_ID_JOYPAD_X; id++)
-		if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, id))
-			keys ^= bind[id];
+	for(int p = 0; p < 2; p++)
+	{
+		keys[p] = 0;
+		for(int id = 0; id < RETRO_DEVICE_ID_JOYPAD_X; id++)
+			if(input_state_cb(p, RETRO_DEVICE_JOYPAD, 0, id))
+				keys[p] ^= bind[id];
+	}
 }
 
 void

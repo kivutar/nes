@@ -26,6 +26,60 @@ uchar *pic;
 int savereq, loadreq;
 u16int keys[2];
 
+#ifdef _WIN32
+#include <windows.h>
+
+ssize_t pread(int fd, void *buf, size_t count, long long offset)
+{
+	OVERLAPPED o = {0,0,0,0,0};
+	HANDLE fh = (HANDLE)_get_osfhandle(fd);
+	uint64_t off = offset;
+	DWORD bytes;
+	BOOL ret;
+
+	if (fh == INVALID_HANDLE_VALUE) {
+		errno = EBADF;
+		return -1;
+	}
+
+	o.Offset = off & 0xffffffff;
+	o.OffsetHigh = (off >> 32) & 0xffffffff;
+
+	ret = ReadFile(fh, buf, (DWORD)count, &bytes, &o);
+	if (!ret) {
+		errno = EIO;
+		return -1;
+	}
+
+	return (ssize_t)bytes;
+}
+
+ssize_t pwrite(int fd, const void *buf, size_t count, long long offset)
+{
+	OVERLAPPED o = {0,0,0,0,0};
+	HANDLE fh = (HANDLE)_get_osfhandle(fd);
+	uint64_t off = offset;
+	DWORD bytes;
+	BOOL ret;
+
+	if (fh == INVALID_HANDLE_VALUE) {
+		errno = EBADF;
+		return -1;
+	}
+
+	o.Offset = off & 0xffffffff;
+	o.OffsetHigh = (off >> 32) & 0xffffffff;
+
+	ret = WriteFile(fh, buf, (DWORD)count, &bytes, &o);
+	if (!ret) {
+		errno = EIO;
+		return -1;
+	}
+
+	return (ssize_t)bytes;
+}
+#endif
+
 /*void
 message(char *fmt, ...)
 {
@@ -181,7 +235,7 @@ retro_load_game(const struct retro_game_info *game)
 	return true;
 }
 
-static const int bind[] = {
+static const int retro_bind[] = {
 	[RETRO_DEVICE_ID_JOYPAD_B] = 1<<1, // B
 	[RETRO_DEVICE_ID_JOYPAD_Y] = 0, // NOTHING
 	[RETRO_DEVICE_ID_JOYPAD_SELECT] = 1<<2, // CONTROL
@@ -201,7 +255,7 @@ process_inputs()
 		keys[p] = 0;
 		for(int id = 0; id < RETRO_DEVICE_ID_JOYPAD_X; id++)
 			if(input_state_cb(p, RETRO_DEVICE_JOYPAD, 0, id))
-				keys[p] ^= bind[id];
+				keys[p] ^= retro_bind[id];
 	}
 }
 
@@ -212,14 +266,14 @@ retro_run(void)
 	process_inputs();
 
 	while(!doflush){
-		if(savereq){
+		/*if(savereq){
 			savestate("nes.save");
 			savereq = 0;
 		}
 		if(loadreq){
 			loadstate("nes.save");
 			loadreq = 0;
-		}
+		}*/
 		t = step() * 12;
 		clock += t;
 		ppuclock += t;

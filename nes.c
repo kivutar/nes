@@ -18,7 +18,7 @@ retro_audio_sample_batch_t audio_cb;
 extern uchar ppuram[16384];
 int nprg, nchr, map, chrram;
 uchar *prg, *chr;
-int clock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock, msgclock, saveclock;
+int cpuclock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock, msgclock, saveclock = 0;
 int oflag, savefd = -1;
 int mirr;
 int doflush = 0;
@@ -275,7 +275,7 @@ retro_run(void)
 			loadreq = 0;
 		}*/
 		t = cpustep() * 12;
-		clock += t;
+		cpuclock += t;
 		ppuclock += t;
 		apuclock += t;
 		sampclock += t;

@@ -274,7 +274,7 @@ retro_run(void)
 			loadstate("nes.save");
 			loadreq = 0;
 		}*/
-		t = step() * 12;
+		t = cpustep() * 12;
 		clock += t;
 		ppuclock += t;
 		apuclock += t;

@@ -19,7 +19,6 @@ enum {
 };
 u8int apuseq, apuctr[13];
 u16int dmcaddr, dmccnt;
-static int fd;
 static short sbuf[2*MAXBUF], *sbufp;
 
 int
@@ -282,7 +281,6 @@ audioout(void)
 		return -1;
 	if(sbufp == sbuf)
 		return 0;
-	//rc = warp10 ? (sbufp - sbuf) * 2 : write(fd, sbuf, (sbufp - sbuf) * 2);
 	audio_cb(sbuf, (sbufp - sbuf) / 2);
 	rc = (sbufp - sbuf) * 2;
 	if(rc > 0)
@@ -295,9 +293,6 @@ audioout(void)
 void
 initaudio(void)
 {
-	// fd = open("/dev/audio", OWRITE);
-	// if(fd < 0)
-	// 	return;
 	sbufp = sbuf;
 }
 

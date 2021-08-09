@@ -253,10 +253,21 @@ retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
     audio_cb = cb;
 }
 
+void
+retro_reset(void) {
+	cpuclock = ppuclock = apuclock = dmcclock = sampclock = msgclock = saveclock = 0;
+	doflush = 0;
+	keys[0] = keys[1] = 0;
+	doflush = 0;
+	initaudio();
+	pc = memread(0xFFFC) | memread(0xFFFD) << 8;
+	rP = FLAGI;
+	dmcfreq = 12 * 428;
+}
+
 void retro_set_controller_port_device(unsigned port, unsigned device) {}
 size_t retro_get_memory_size(unsigned id) { return 0; }
 void * retro_get_memory_data(unsigned id) { return NULL; }
-void retro_reset(void) {}
 void retro_unload_game(void) {}
 void retro_deinit(void) {}
 void retro_set_audio_sample(retro_audio_sample_t cb) {}

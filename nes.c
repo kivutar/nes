@@ -26,73 +26,6 @@ uchar *pic;
 int savereq, loadreq;
 u16int keys[2];
 
-#ifdef _WIN32
-#include <windows.h>
-
-ssize_t pread(int fd, void *buf, size_t count, long long offset)
-{
-	OVERLAPPED o = {0,0,0,0,0};
-	HANDLE fh = (HANDLE)_get_osfhandle(fd);
-	uint64_t off = offset;
-	DWORD bytes;
-	BOOL ret;
-
-	if (fh == INVALID_HANDLE_VALUE) {
-		errno = EBADF;
-		return -1;
-	}
-
-	o.Offset = off & 0xffffffff;
-	o.OffsetHigh = (off >> 32) & 0xffffffff;
-
-	ret = ReadFile(fh, buf, (DWORD)count, &bytes, &o);
-	if (!ret) {
-		errno = EIO;
-		return -1;
-	}
-
-	return (ssize_t)bytes;
-}
-
-ssize_t pwrite(int fd, const void *buf, size_t count, long long offset)
-{
-	OVERLAPPED o = {0,0,0,0,0};
-	HANDLE fh = (HANDLE)_get_osfhandle(fd);
-	uint64_t off = offset;
-	DWORD bytes;
-	BOOL ret;
-
-	if (fh == INVALID_HANDLE_VALUE) {
-		errno = EBADF;
-		return -1;
-	}
-
-	o.Offset = off & 0xffffffff;
-	o.OffsetHigh = (off >> 32) & 0xffffffff;
-
-	ret = WriteFile(fh, buf, (DWORD)count, &bytes, &o);
-	if (!ret) {
-		errno = EIO;
-		return -1;
-	}
-
-	return (ssize_t)bytes;
-}
-#endif
-
-/*void
-message(char *fmt, ...)
-{
-	va_list va;
-	static char buf[512];
-	
-	va_start(va, fmt);
-	vsnprint(buf, sizeof buf, fmt, va);
-	string(screen, Pt(10, 10), display->black, ZP, display->defaultfont, buf);
-	msgclock = FREQ;
-	va_end(va);
-}*/
-
 void
 flushram(void)
 {
@@ -102,20 +35,14 @@ flushram(void)
 }
 
 void
-loadrom(const char *file, int sflag)
+loadrom(const void *data)
 {
-	int fd;
 	int nes20;
-	char *s;
 	static uchar header[16];
 	static u32int flags;
 	static char buf[512];
-	
-	fd = open(file, OREAD);
-	if(fd < 0)
-		sysfatal("open");
-	if(readn(fd, header, sizeof(header)) < sizeof(header))
-		sysfatal("read");
+
+	memcpy(header, data, sizeof(header));
 	if(memcmp(header, "NES\x1a", 4) != 0)
 		sysfatal("not a ROM");
 	if(header[15] != 0)
@@ -139,20 +66,18 @@ loadrom(const char *file, int sflag)
 		sysfatal("unimplemented mapper %d", map);
 
 	memset(mem, 0, sizeof(mem));
-	if((flags & FLTRAINER) != 0 && readn(fd, mem + 0x7000, 512) < 512)
-			sysfatal("read");
+	if((flags & FLTRAINER) != 0)
+		memcpy(mem + 0x7000, data+sizeof(header), 512);
 	prg = malloc(nprg * PRGSZ);
 	if(prg == nil)
 		sysfatal("malloc");
-	if(readn(fd, prg, nprg * PRGSZ) < nprg * PRGSZ)
-		sysfatal("read");
+	memcpy(prg, data+sizeof(header), nprg * PRGSZ);
 	chrram = nchr == 0;
 	if(nchr != 0){
 		chr = malloc(nchr * CHRSZ);
 		if(chr == nil)
 			sysfatal("malloc");
-		if(readn(fd, chr, nchr * CHRSZ) < nchr * CHRSZ)
-			sysfatal("read");
+		memcpy(chr, data+sizeof(header)+(nprg * PRGSZ), nchr * CHRSZ);
 	}else{
 		nchr = 1;
 		chr = malloc(nchr * CHRSZ);
@@ -165,21 +90,6 @@ loadrom(const char *file, int sflag)
 		mirr = MVERT;
 	else
 		mirr = MHORZ;
-	/*if(sflag){
-		strncpy(buf, file, sizeof buf - 5);
-		s = buf + strlen(buf) - 4;
-		if(s < buf || strcmp(s, ".nes") != 0)
-			s += 4;
-		strcpy(s, ".sav");
-		savefd = create(buf, ORDWR | OEXCL, 0666);
-		if(savefd < 0)
-			savefd = open(buf, ORDWR);
-		if(savefd < 0)
-			message("open: %r");
-		else
-			readn(savefd, mem + 0x6000, 0x2000);
-		atexit(flushram);
-	}*/
 	mapper[map](INIT, 0);
 }
 
@@ -196,7 +106,7 @@ retro_get_system_info(struct retro_system_info *info)
 	memset(info, 0, sizeof(*info));
 	info->library_name = "nes";
 	info->library_version = "1.0";
-	info->need_fullpath = true;
+	info->need_fullpath = false;
 	info->valid_extensions = "nes";
 }
 
@@ -228,7 +138,7 @@ retro_load_game(const struct retro_game_info *game)
 
 	pic = malloc(256 * 240 * 4);
 	initaudio();
-	loadrom(game->path, 0);
+	loadrom(game->data);
 	pc = memread(0xFFFC) | memread(0xFFFD) << 8;
 	rP = FLAGI;
 	dmcfreq = 12 * 428;
@@ -296,14 +206,6 @@ retro_run(void)
 			dmcstep();
 			dmcclock -= dmcfreq;
 		}
-		/*if(msgclock > 0){
-			msgclock -= t;
-			if(msgclock <= 0){
-				extern Image *bg;
-				draw(screen, screen->r, bg, nil, ZP);
-				msgclock = 0;
-			}
-		}*/
 		if(saveclock > 0){
 			saveclock -= t;
 			if(saveclock <= 0)

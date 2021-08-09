@@ -29,8 +29,8 @@ u16int keys[2];
 void
 flushram(void)
 {
-	if(savefd >= 0)
-		pwrite(savefd, mem + 0x6000, 0x2000, 0);
+	//if(savefd >= 0)
+	//	pwrite(savefd, mem + 0x6000, 0x2000, 0);
 	saveclock = 0;
 }
 

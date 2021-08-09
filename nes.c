@@ -67,17 +67,17 @@ loadrom(const void *data)
 
 	memset(mem, 0, sizeof(mem));
 	if((flags & FLTRAINER) != 0)
-		memcpy(mem + 0x7000, data, 512);
-	prg = malloc(nprg * PRGSZ);
+		memcpy(mem + 0x7000, data+sizeof(header), 512);
+	prg = (uchar*)malloc(nprg * PRGSZ);
 	if(prg == nil)
 		sysfatal("malloc");
-	memcpy(prg, data, nprg * PRGSZ);
+	memcpy(prg, data+sizeof(header), nprg * PRGSZ);
 	chrram = nchr == 0;
 	if(nchr != 0){
 		chr = malloc(nchr * CHRSZ);
 		if(chr == nil)
 			sysfatal("malloc");
-		memcpy(chr, data, nchr * CHRSZ);
+		memcpy(chr, data+sizeof(header)+(nprg * PRGSZ), nchr * CHRSZ);
 	}else{
 		nchr = 1;
 		chr = malloc(nchr * CHRSZ);

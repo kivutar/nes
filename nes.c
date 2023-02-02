@@ -23,7 +23,6 @@ int oflag, savefd = -1;
 int mirr;
 int doflush = 0;
 uchar *pic;
-int savereq, loadreq;
 u16int keys[2];
 
 void
@@ -176,14 +175,6 @@ retro_run(void)
 	process_inputs();
 
 	while(!doflush){
-		/*if(savereq){
-			savestate("nes.save");
-			savereq = 0;
-		}
-		if(loadreq){
-			loadstate("nes.save");
-			loadreq = 0;
-		}*/
 		t = cpustep() * 12;
 		cpuclock += t;
 		ppuclock += t;
@@ -254,7 +245,8 @@ retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 }
 
 void
-retro_reset(void) {
+retro_reset(void)
+{
 	cpuclock = ppuclock = apuclock = dmcclock = sampclock = msgclock = saveclock = 0;
 	doflush = 0;
 	keys[0] = keys[1] = 0;
@@ -265,15 +257,30 @@ retro_reset(void) {
 	dmcfreq = 12 * 428;
 }
 
+size_t
+retro_serialize_size(void)
+{
+	return (32+16)*1024+256+40*8;
+}
+
+bool
+retro_serialize(void *data, size_t size)
+{
+	return savestate(data, size);
+}
+
+bool
+retro_unserialize(const void *data, size_t size)
+{
+	return loadstate(data, size);
+}
+
 void retro_set_controller_port_device(unsigned port, unsigned device) {}
 size_t retro_get_memory_size(unsigned id) { return 0; }
 void * retro_get_memory_data(unsigned id) { return NULL; }
 void retro_unload_game(void) {}
 void retro_deinit(void) {}
 void retro_set_audio_sample(retro_audio_sample_t cb) {}
-size_t retro_serialize_size(void) { return 0; }
-bool retro_serialize(void *data, size_t size) { return false; }
-bool retro_unserialize(const void *data, size_t size) { return false; }
 void retro_cheat_reset(void) {}
 void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info) { return false; }

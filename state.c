@@ -1,16 +1,17 @@
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "u.h"
 #include "compat.h"
 #include "dat.h"
 #include "fns.h"
 
-static int fd;
+static FILE* fp;
 
 void
 put8(u8int i)
 {
-	write(fd, &i, 1);
+	fwrite(&i, 1, 1, fp);
 }
 
 void
@@ -34,7 +35,7 @@ get8(void)
 {
 	u8int c;
 	
-	read(fd, &c, 1);
+	fread(&c, 1, 1, fp);
 	return c;
 }
 
@@ -60,19 +61,18 @@ get32(void)
 	return i;
 }
 
-void
-loadstate(char *file)
+bool
+loadstate(const void *data, size_t size)
 {
-	fd = open(file, OREAD);
-	if(fd < 0){
-		//message("open: %r");
-		return;
+	fp = fmemopen(data, size, "rb");
+	if(!fp){
+		return false;
 	}
-	read(fd, mem, sizeof(mem));
-	read(fd, ppuram, sizeof(ppuram));
-	read(fd, oam, sizeof(oam));
+	fread(mem, sizeof(mem), 1, fp);
+	fread(ppuram, sizeof(ppuram), 1, fp);
+	fread(oam, sizeof(oam), 1, fp);
 	if(chrram)
-		read(fd, chr, nchr * CHRSZ);
+		fread(chr, nchr * CHRSZ, 1, fp);
 	rA = get8();
 	rX = get8();
 	rY = get8();
@@ -97,24 +97,24 @@ loadstate(char *file)
 	apuseq = get8();
 	dmcaddr = get16();
 	dmccnt = get16();
-	read(fd, apuctr, sizeof(apuctr));
+	fread(apuctr, sizeof(apuctr), 1, fp);
 	mapper[map](RSTR, 0);
-	close(fd);
+	fclose(fp);
+	return true;
 }
 
-void
-savestate(char *file)
+bool
+savestate(void *data, size_t size)
 {
-	fd = -1; //create(file, ORDWR, 0666);
-	if(fd < 0){
-		//message("create: %r");
-		return;
+	fp = fmemopen(data, size, "wb");
+	if(!fp){
+		return false;
 	}
-	write(fd, mem, sizeof(mem));
-	write(fd, ppuram, sizeof(ppuram));
-	write(fd, oam, sizeof(oam));
+	fwrite(mem, sizeof(mem), 1, fp);
+	fwrite(ppuram, sizeof(ppuram), 1, fp);
+	fwrite(oam, sizeof(oam), 1, fp);
 	if(chrram)
-		write(fd, chr, nchr * CHRSZ);
+		fwrite(chr, nchr * CHRSZ, 1, fp);
 	put8(rA);
 	put8(rX);
 	put8(rY);
@@ -139,7 +139,8 @@ savestate(char *file)
 	put8(apuseq);
 	put16(dmcaddr);
 	put16(dmccnt);
-	write(fd, apuctr, sizeof(apuctr));
+	fwrite(apuctr, sizeof(apuctr), 1, fp);
 	mapper[map](SAVE, 0);
-	close(fd);
+	fclose(fp);
+	return true;
 }

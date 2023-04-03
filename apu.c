@@ -186,6 +186,7 @@ tri(void)
 	i ^= (i < 16) ? 0xf : 0x10;
 	if(apuctr[LEN + 2] == 0 || (apuctr[TRILIN] & 0x7f) == 0)
 		return 0;
+	i = i > 15 ? 15 : i;
 	return i;
 }
 

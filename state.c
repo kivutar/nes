@@ -64,7 +64,7 @@ get32(void)
 bool
 loadstate(const void *data, size_t size)
 {
-	fp = fmemopen(data, size, "rb");
+	fp = fmemopen((void*)data, size, "rb");
 	if(!fp){
 		return false;
 	}

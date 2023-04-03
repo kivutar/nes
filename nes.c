@@ -250,7 +250,6 @@ retro_reset(void)
 	cpuclock = ppuclock = apuclock = dmcclock = sampclock = msgclock = saveclock = 0;
 	doflush = 0;
 	keys[0] = keys[1] = 0;
-	doflush = 0;
 	initaudio();
 	pc = memread(0xFFFC) | memread(0xFFFD) << 8;
 	rP = FLAGI;

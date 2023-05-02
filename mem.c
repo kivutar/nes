@@ -11,6 +11,7 @@ uchar *prgb[16], *chrb[16];
 u16int pput, ppuv;
 u8int ppusx, vrambuf;
 u32int keylatch[2] = {0xFFFFFFFF, 0xFFFFFFFF};
+int fourscore = 1;
 int vramlatch = 1;
 int prgsh, chrsh, mmc3hack;
 extern u8int keys[4];
@@ -494,10 +495,14 @@ memwrite(u16int p, u8int v)
 			irq &= ~IRQDMC;
 			break;
 		case 0x4016:
-			if((mem[p] & 1) != 0 && (v & 1) == 0){
-				keylatch[0] = (0xFF08 << 16) |keys[0] | (keys[2] << 8);
-				keylatch[1] = (0xFF04 << 16) |keys[1] | (keys[3] << 8);
-			}
+			if((mem[p] & 1) != 0 && (v & 1) == 0)
+				if(fourscore){
+					keylatch[0] = 0xFF080000 | keys[0] | (keys[2] << 8);
+					keylatch[1] = 0xFF040000 | keys[1] | (keys[3] << 8);
+				}else{
+					keylatch[0] = 0xFFFFFF00 | keys[0];
+					keylatch[1] = 0xFFFFFF00 | keys[1];
+				}
 			break;
 		case APUFRAME:
 			apuseq = 0;

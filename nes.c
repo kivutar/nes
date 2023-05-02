@@ -206,7 +206,6 @@ retro_run(void)
 	video_cb(pic, 256, 240, 256*4);
 	audioout();
 	doflush = 0;
-	printf("frame ===============================\n");
 }
 
 void

@@ -259,7 +259,7 @@ retro_reset(void)
 size_t
 retro_serialize_size(void)
 {
-	return (32+16)*1024+256+40*8;
+	return (32+16)*1024+256+46*8;
 }
 
 bool

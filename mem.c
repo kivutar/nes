@@ -393,14 +393,15 @@ memread(u16int p)
 			if((mem[p] & 1) != 0)
 				return keys[0] & 1;
 			v = keylatch[0] & 1;
-			keylatch[0] = (keylatch[0] >> 1) | 0x8000000;
-			printf("keylatch[0] %lu return %d\n", keylatch[0], v | 0x40);
+			keylatch[0] = (keylatch[0] >> 1) | 0x80000000;
+			printf("4016 keylatch[0] %lu return %d\n", keylatch[0], v | 0x40);
 			return v | 0x40;
 		case 0x4017:
 			if((mem[p] & 1) != 0)
 				return keys[1] & 1;
 			v = keylatch[1] & 1;
-			keylatch[1] = (keylatch[1] >> 1) | 0x80;
+			keylatch[1] = (keylatch[1] >> 1) | 0x80000000;
+			printf("4017 keylatch[1] %lu return %d\n", keylatch[1], v | 0x40);
 			return v | 0x40;
 		}
 	}

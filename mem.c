@@ -10,10 +10,11 @@ uchar oam[256];
 uchar *prgb[16], *chrb[16];
 u16int pput, ppuv;
 u8int ppusx, vrambuf;
-int keylatch[2] = {0xFF, 0xFF};
+u32int keylatch[2] = {0xFFFFFFFF, 0xFFFFFFFF};
+int fourscore = 1;
 int vramlatch = 1;
 int prgsh, chrsh, mmc3hack;
-extern u16int keys[2];
+extern u8int keys[4];
 
 static void
 nope(int p)
@@ -393,13 +394,13 @@ memread(u16int p)
 			if((mem[p] & 1) != 0)
 				return keys[0] & 1;
 			v = keylatch[0] & 1;
-			keylatch[0] = (keylatch[0] >> 1) | 0x80;
+			keylatch[0] = (keylatch[0] >> 1) | 0x80000000;
 			return v | 0x40;
 		case 0x4017:
 			if((mem[p] & 1) != 0)
 				return keys[1] & 1;
 			v = keylatch[1] & 1;
-			keylatch[1] = (keylatch[1] >> 1) | 0x80;
+			keylatch[1] = (keylatch[1] >> 1) | 0x80000000;
 			return v | 0x40;
 		}
 	}
@@ -494,10 +495,14 @@ memwrite(u16int p, u8int v)
 			irq &= ~IRQDMC;
 			break;
 		case 0x4016:
-			if((mem[p] & 1) != 0 && (v & 1) == 0){
-				keylatch[0] = keys[0];
-				keylatch[1] = keys[1];
-			}
+			if((mem[p] & 1) != 0 && (v & 1) == 0)
+				if(fourscore){
+					keylatch[0] = 0xFF080000 | keys[0] | (keys[2] << 8);
+					keylatch[1] = 0xFF040000 | keys[1] | (keys[3] << 8);
+				}else{
+					keylatch[0] = 0xFFFFFF00 | keys[0];
+					keylatch[1] = 0xFFFFFF00 | keys[1];
+				}
 			break;
 		case APUFRAME:
 			apuseq = 0;

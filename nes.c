@@ -24,6 +24,7 @@ int mirr;
 int doflush = 0;
 uchar *pic;
 u8int keys[4];
+extern int fourscore;
 
 void
 flushram(void)
@@ -134,6 +135,30 @@ retro_load_game(const struct retro_game_info *game)
 	enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
 	if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
 		return false;
+
+	struct retro_core_option_definition options[] = {
+		{
+			.key = "nes_fourscore",
+			.desc = "FourScore Multitap",
+			.info = "Allows to play with more than 2 players on some games.",
+			.values = {
+				{ "false", NULL },
+				{ "true",  NULL },
+				{ NULL, NULL },
+			},
+			.default_value = "false",
+		},
+		{ NULL, NULL, NULL, {{ NULL }}, NULL },
+	};
+
+	if (!environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS, &options))
+		return false;
+
+	struct retro_variable var_fourscore = { .key = "nes_fourscore" };
+	if (!environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var_fourscore))
+		return false;
+
+	fourscore = strcmp(var_fourscore.value, "true") == 0;
 
 	pic = malloc(256 * 240 * 4);
 	initaudio();

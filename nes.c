@@ -23,7 +23,7 @@ int oflag, savefd = -1;
 int mirr;
 int doflush = 0;
 uchar *pic;
-u16int keys[2];
+u8int keys[4];
 
 void
 flushram(void)
@@ -159,7 +159,7 @@ static const int retro_bind[] = {
 void
 process_inputs()
 {
-	for(int p = 0; p < 2; p++)
+	for(int p = 0; p < 4; p++)
 	{
 		keys[p] = 0;
 		for(int id = 0; id < RETRO_DEVICE_ID_JOYPAD_X; id++)
@@ -206,6 +206,7 @@ retro_run(void)
 	video_cb(pic, 256, 240, 256*4);
 	audioout();
 	doflush = 0;
+	printf("frame ===============================\n");
 }
 
 void
@@ -249,7 +250,7 @@ retro_reset(void)
 {
 	cpuclock = ppuclock = apuclock = dmcclock = sampclock = msgclock = saveclock = 0;
 	doflush = 0;
-	keys[0] = keys[1] = 0;
+	keys[0] = keys[1] = keys[2] = keys[3] = 0;
 	initaudio();
 	pc = memread(0xFFFC) | memread(0xFFFD) << 8;
 	rP = FLAGI;

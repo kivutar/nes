@@ -88,8 +88,8 @@ loadstate(const void *data, size_t size)
 	mirr = get8();
 	odd = get8();
 	vramlatch = get8();
-	keylatch[0] = get8();
-	keylatch[1] = get8();
+	keylatch[0] = get32();
+	keylatch[1] = get32();
 	vrambuf = get8();
 	cpuclock = get32();
 	ppuclock = get32();
@@ -130,8 +130,8 @@ savestate(void *data, size_t size)
 	put8(mirr);
 	put8(odd);
 	put8(vramlatch);
-	put8(keylatch[0]);
-	put8(keylatch[1]);
+	put32(keylatch[0]);
+	put32(keylatch[1]);
 	put8(vrambuf);
 	put32(cpuclock);
 	put32(ppuclock);

@@ -5,7 +5,7 @@ extern uchar mem[32768], ppuram[16384], oam[256];
 extern u16int pput, ppuv;
 extern u8int ppusx, vrambuf;
 extern int mirr, ppux, ppuy, odd, vramlatch;
-extern int keylatch[2];
+extern u32int keylatch[2];
 
 extern int map, mmc3hack, oflag;
 extern uchar *prg, *chr;

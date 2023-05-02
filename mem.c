@@ -10,10 +10,10 @@ uchar oam[256];
 uchar *prgb[16], *chrb[16];
 u16int pput, ppuv;
 u8int ppusx, vrambuf;
-int keylatch[2] = {0xFF, 0xFF};
+u32int keylatch[2] = {0xFFFFFFFF, 0xFFFFFFFF};
 int vramlatch = 1;
 int prgsh, chrsh, mmc3hack;
-extern u16int keys[2];
+extern u8int keys[4];
 
 static void
 nope(int p)
@@ -393,7 +393,8 @@ memread(u16int p)
 			if((mem[p] & 1) != 0)
 				return keys[0] & 1;
 			v = keylatch[0] & 1;
-			keylatch[0] = (keylatch[0] >> 1) | 0x80;
+			keylatch[0] = (keylatch[0] >> 1) | 0x8000000;
+			printf("keylatch[0] %lu return %d\n", keylatch[0], v | 0x40);
 			return v | 0x40;
 		case 0x4017:
 			if((mem[p] & 1) != 0)
@@ -495,8 +496,9 @@ memwrite(u16int p, u8int v)
 			break;
 		case 0x4016:
 			if((mem[p] & 1) != 0 && (v & 1) == 0){
-				keylatch[0] = keys[0];
-				keylatch[1] = keys[1];
+				keylatch[0] = (0xFF04 << 16) |keys[0] | (keys[0] << 8);
+				keylatch[1] = (0xFF08 << 16) |keys[1] | (keys[3] << 8);
+				print("keylatch %d %d\n", keylatch[0], keylatch[1]);
 			}
 			break;
 		case APUFRAME:

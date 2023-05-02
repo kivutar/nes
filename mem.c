@@ -394,14 +394,12 @@ memread(u16int p)
 				return keys[0] & 1;
 			v = keylatch[0] & 1;
 			keylatch[0] = (keylatch[0] >> 1) | 0x80000000;
-			printf("4016 keylatch[0] %lu return %d\n", keylatch[0], v | 0x40);
 			return v | 0x40;
 		case 0x4017:
 			if((mem[p] & 1) != 0)
 				return keys[1] & 1;
 			v = keylatch[1] & 1;
 			keylatch[1] = (keylatch[1] >> 1) | 0x80000000;
-			printf("4017 keylatch[1] %lu return %d\n", keylatch[1], v | 0x40);
 			return v | 0x40;
 		}
 	}
@@ -497,9 +495,8 @@ memwrite(u16int p, u8int v)
 			break;
 		case 0x4016:
 			if((mem[p] & 1) != 0 && (v & 1) == 0){
-				keylatch[0] = (0xFF04 << 16) |keys[0] | (keys[0] << 8);
-				keylatch[1] = (0xFF08 << 16) |keys[1] | (keys[3] << 8);
-				print("keylatch %d %d\n", keylatch[0], keylatch[1]);
+				keylatch[0] = (0xFF08 << 16) |keys[0] | (keys[2] << 8);
+				keylatch[1] = (0xFF04 << 16) |keys[1] | (keys[3] << 8);
 			}
 			break;
 		case APUFRAME:

@@ -1,17 +1,18 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <string.h>
 #include "u.h"
 #include "compat.h"
 #include "dat.h"
 #include "fns.h"
 
-static FILE* fp;
+static void* addr;
 
 void
 put8(u8int i)
 {
-	fwrite(&i, 1, 1, fp);
+	*(u8int*)addr = i; addr += 1;
 }
 
 void
@@ -34,8 +35,8 @@ int
 get8(void)
 {
 	u8int c;
-	
-	fread(&c, 1, 1, fp);
+
+	c = *(u8int*)addr; addr += 1;
 	return c;
 }
 
@@ -43,7 +44,7 @@ int
 get16(void)
 {
 	int i;
-	
+
 	i = get8();
 	i |= get8() << 8;
 	return i;
@@ -53,7 +54,7 @@ int
 get32(void)
 {
 	int i;
-	
+
 	i = get8();
 	i |= get8() << 8;
 	i |= get8() << 16;
@@ -64,15 +65,13 @@ get32(void)
 bool
 loadstate(const void *data, size_t size)
 {
-	fp = fmemopen((void*)data, size, "rb");
-	if(!fp){
-		return false;
+	addr = data;
+	memcpy(mem, addr, sizeof(mem)); addr += sizeof(mem);
+	memcpy(ppuram, addr, sizeof(ppuram)); addr += sizeof(ppuram);
+	memcpy(oam, addr, sizeof(oam)); addr += sizeof(oam);
+	if(chrram){
+		memcpy(chr, addr, nchr * CHRSZ); addr += nchr * CHRSZ;
 	}
-	fread(mem, sizeof(mem), 1, fp);
-	fread(ppuram, sizeof(ppuram), 1, fp);
-	fread(oam, sizeof(oam), 1, fp);
-	if(chrram)
-		fread(chr, nchr * CHRSZ, 1, fp);
 	rA = get8();
 	rX = get8();
 	rY = get8();
@@ -97,24 +96,21 @@ loadstate(const void *data, size_t size)
 	apuseq = get8();
 	dmcaddr = get16();
 	dmccnt = get16();
-	fread(apuctr, sizeof(apuctr), 1, fp);
+	memcpy(apuctr, addr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](RSTR, 0);
-	fclose(fp);
 	return true;
 }
 
 bool
 savestate(void *data, size_t size)
 {
-	fp = fmemopen(data, size, "wb");
-	if(!fp){
-		return false;
+	addr = data;
+	memcpy(addr, mem, sizeof(mem)); addr += sizeof(mem);
+	memcpy(addr, ppuram, sizeof(ppuram)); addr += sizeof(ppuram);
+	memcpy(addr, oam, sizeof(oam)); addr += sizeof(oam);
+	if(chrram){
+		memcpy(addr, chr, nchr * CHRSZ); addr += nchr * CHRSZ;
 	}
-	fwrite(mem, sizeof(mem), 1, fp);
-	fwrite(ppuram, sizeof(ppuram), 1, fp);
-	fwrite(oam, sizeof(oam), 1, fp);
-	if(chrram)
-		fwrite(chr, nchr * CHRSZ, 1, fp);
 	put8(rA);
 	put8(rX);
 	put8(rY);
@@ -139,8 +135,7 @@ savestate(void *data, size_t size)
 	put8(apuseq);
 	put16(dmcaddr);
 	put16(dmccnt);
-	fwrite(apuctr, sizeof(apuctr), 1, fp);
+	memcpy(addr, apuctr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](SAVE, 0);
-	fclose(fp);
 	return true;
 }

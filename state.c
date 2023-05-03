@@ -7,6 +7,23 @@
 #include "dat.h"
 #include "fns.h"
 
+static FILE* fp;
+
+void
+put8(u8int i)
+{
+	fwrite(&i, 1, 1, fp);
+}
+
+int
+get8(void)
+{
+	u8int c;
+	
+	fread(&c, 1, 1, fp);
+	return c;
+}
+
 bool
 loadstate(const void *data, size_t size)
 {

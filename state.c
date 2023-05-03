@@ -35,7 +35,7 @@ int
 get8(void)
 {
 	u8int c;
-
+	
 	c = *(u8int*)addr; addr += 1;
 	return c;
 }
@@ -53,13 +53,13 @@ get16(void)
 int
 get32(void)
 {
-       int i;
-       
-       i = get8();
-       i |= get8() << 8;
-       i |= get8() << 16;
-       i |= get8() << 24;
-       return i;
+	int i;
+
+	i = get8();
+	i |= get8() << 8;
+	i |= get8() << 16;
+	i |= get8() << 24;
+	return i;
 }
 
 bool

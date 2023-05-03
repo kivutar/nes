@@ -7,27 +7,27 @@
 #include "dat.h"
 #include "fns.h"
 
-static FILE* fp;
+static void* addr;
 
 void
 put8(u8int i)
 {
-	fwrite(&i, 1, 1, fp);
+	*(u8int*)addr = i; addr += 1;
 }
 
 int
 get8(void)
 {
 	u8int c;
-	
-	fread(&c, 1, 1, fp);
+
+	c = *(u8int*)addr; addr += 1;
 	return c;
 }
 
 bool
 loadstate(const void *data, size_t size)
 {
-	void* addr = data;
+	addr = data;
 	memcpy(mem, addr, sizeof(mem)); addr += sizeof(mem);
 	memcpy(ppuram, addr, sizeof(ppuram)); addr += sizeof(ppuram);
 	memcpy(oam, addr, sizeof(oam)); addr += sizeof(oam);
@@ -66,7 +66,7 @@ loadstate(const void *data, size_t size)
 bool
 savestate(void *data, size_t size)
 {
-	void* addr = data;
+	addr = data;
 	memcpy(addr, mem, sizeof(mem)); addr += sizeof(mem);
 	memcpy(addr, ppuram, sizeof(ppuram)); addr += sizeof(ppuram);
 	memcpy(addr, oam, sizeof(oam)); addr += sizeof(oam);

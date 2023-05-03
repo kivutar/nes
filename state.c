@@ -15,6 +15,22 @@ put8(u8int i)
 	*(u8int*)addr = i; addr += 1;
 }
 
+void
+put16(u16int i)
+{
+	put8(i);
+	put8(i >> 8);
+}
+
+void
+put32(u32int i)
+{
+	put8(i);
+	put8(i >> 8);
+	put8(i >> 16);
+	put8(i >> 24);
+}
+
 int
 get8(void)
 {
@@ -22,6 +38,28 @@ get8(void)
 
 	c = *(u8int*)addr; addr += 1;
 	return c;
+}
+
+int
+get16(void)
+{
+	int i;
+
+	i = get8();
+	i |= get8() << 8;
+	return i;
+}
+
+int
+get32(void)
+{
+       int i;
+       
+       i = get8();
+       i |= get8() << 8;
+       i |= get8() << 16;
+       i |= get8() << 24;
+       return i;
 }
 
 bool
@@ -34,30 +72,30 @@ loadstate(const void *data, size_t size)
 	if(chrram){
 		memcpy(chr, addr, nchr * CHRSZ); addr += nchr * CHRSZ;
 	}
-	rA = *(u8int*)addr; addr += 1;
-	rX = *(u8int*)addr; addr += 1;
-	rY = *(u8int*)addr; addr += 1;
-	rS = *(u8int*)addr; addr += 1;
-	rP = *(u8int*)addr; addr += 1;
-	nmi = *(u8int*)addr; addr += 1;
-	pc = *(u16int*)addr; addr += 2;
-	pput = *(u16int*)addr; addr += 2;
-	ppuv = *(u16int*)addr; addr += 2;
-	ppusx = *(u8int*)addr; addr += 1;
-	ppux = *(u16int*)addr; addr += 2;
-	ppuy = *(u16int*)addr; addr += 2;
-	mirr = *(u8int*)addr; addr += 1;
-	odd = *(u8int*)addr; addr += 1;
-	vramlatch = *(u8int*)addr; addr += 1;
-	keylatch[0] = *(u32int*)addr; addr += 4;
-	keylatch[1] = *(u32int*)addr; addr += 4;
-	vrambuf = *(u8int*)addr; addr += 1;
-	cpuclock = *(u32int*)addr; addr += 4;
-	ppuclock = *(u32int*)addr; addr += 4;
-	apuclock = *(u32int*)addr; addr += 4;
-	apuseq = *(u8int*)addr; addr += 1;
-	dmcaddr = *(u16int*)addr; addr += 2;
-	dmccnt = *(u16int*)addr; addr += 2;
+	rA = get8();
+	rX = get8();
+	rY = get8();
+	rS = get8();
+	rP = get8();
+	nmi = get8();
+	pc = get16();
+	pput = get16();
+	ppuv = get16();
+	ppusx = get8();
+	ppux = get16();
+	ppuy = get16();
+	mirr = get8();
+	odd = get8();
+	vramlatch = get8();
+	keylatch[0] = get32();
+	keylatch[1] = get32();
+	vrambuf = get8();
+	cpuclock = get32();
+	ppuclock = get32();
+	apuclock = get32();
+	apuseq = get8();
+	dmcaddr = get16();
+	dmccnt = get16();
 	memcpy(apuctr, addr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](RSTR, 0);
 	return true;
@@ -73,30 +111,30 @@ savestate(void *data, size_t size)
 	if(chrram){
 		memcpy(addr, chr, nchr * CHRSZ); addr += nchr * CHRSZ;
 	}
-	*(u8int*)addr = rA; addr += 1;
-	*(u8int*)addr = rX; addr += 1;
-	*(u8int*)addr = rY; addr += 1;
-	*(u8int*)addr = rS; addr += 1;
-	*(u8int*)addr = rP; addr += 1;
-	*(u8int*)addr = nmi; addr += 1;
-	*(u16int*)addr = pc; addr += 2;
-	*(u16int*)addr = pput; addr += 2;
-	*(u16int*)addr = ppuv; addr += 2;
-	*(u8int*)addr = ppusx; addr += 1;
-	*(u16int*)addr = ppux; addr += 2;
-	*(u16int*)addr = ppuy; addr += 2;
-	*(u8int*)addr = mirr; addr += 1;
-	*(u8int*)addr = odd; addr += 1;
-	*(u8int*)addr = vramlatch; addr += 1;
-	*(u32int*)addr = keylatch[0]; addr += 4;
-	*(u32int*)addr = keylatch[1]; addr += 4;
-	*(u8int*)addr = vrambuf; addr += 1;
-	*(u32int*)addr = cpuclock; addr += 4;
-	*(u32int*)addr = ppuclock; addr += 4;
-	*(u32int*)addr = apuclock; addr += 4;
-	*(u8int*)addr = apuseq; addr += 1;
-	*(u16int*)addr = dmcaddr; addr += 2;
-	*(u16int*)addr = dmccnt; addr += 2;
+	put8(rA);
+	put8(rX);
+	put8(rY);
+	put8(rS);
+	put8(rP);
+	put8(nmi);
+	put16(pc);
+	put16(pput);
+	put16(ppuv);
+	put8(ppusx);
+	put16(ppux);
+	put16(ppuy);
+	put8(mirr);
+	put8(odd);
+	put8(vramlatch);
+	put32(keylatch[0]);
+	put32(keylatch[1]);
+	put8(vrambuf);
+	put32(cpuclock);
+	put32(ppuclock);
+	put32(apuclock);
+	put8(apuseq);
+	put16(dmcaddr);
+	put16(dmccnt);
 	memcpy(addr, apuctr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](SAVE, 0);
 	return true;

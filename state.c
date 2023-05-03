@@ -35,7 +35,7 @@ int
 get8(void)
 {
 	u8int c;
-	
+
 	c = *(u8int*)addr; addr += 1;
 	return c;
 }

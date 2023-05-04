@@ -163,10 +163,7 @@ static RETRO_CALLCONV void* hc_set_debugger(hc_DebuggerIf* const debugger_if) {
 	// debugger_if->v1.subscribe = subscribe;
 	// debugger_if->v1.unsubscribe = unsubscribe;
 
-	// if (_console && _console->GetMapper())
-	// {
-		prg_rom.v1.size = nprg * PRGSZ;
-	// }
+	prg_rom.v1.size = nprg * PRGSZ; // TODO check if this works with all mappers
 
 	return (void*)&nes_system;
 }

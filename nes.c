@@ -129,12 +129,17 @@ retro_api_version(void)
 	return RETRO_API_VERSION;
 }
 
+extern RETRO_CALLCONV retro_proc_address_t get_proc_address(const char* sym);
+
 bool
 retro_load_game(const struct retro_game_info *game)
 {
 	enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
 	if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
 		return false;
+
+	struct retro_get_proc_address_interface get_proc = { get_proc_address };
+	environ_cb(RETRO_ENVIRONMENT_SET_PROC_ADDRESS_CALLBACK, (void*)&get_proc);
 
 	struct retro_core_option_definition options[] = {
 		{

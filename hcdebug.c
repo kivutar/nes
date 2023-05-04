@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include "hcdebug.h"
 #include "libretro.h"
 #include "u.h"
@@ -7,8 +8,6 @@
 extern int nprg;
 extern uchar *prg;
 extern uchar mem[32768];
-
-hc_DebuggerIf* debugger = NULL;
 
 extern hc_Memory const main_memory;
 extern hc_Cpu const cpu;
@@ -157,6 +156,19 @@ hc_SubscriptionID next_breakpoint_id()
 	return breakpoint_id = (breakpoint_id + 1) & ~(1ULL << 63ULL);
 }
 
+uint8_t mem_peek(uint64_t address)
+{
+	printf("mem_peek %04x\n", address);
+	return mem[address];
+}
+
+int mem_poke(uint64_t address, uint8_t value)
+{
+	printf("mem_poke %04x %02x\n", address, value);
+	mem[address] = value;
+	return true;
+}
+
 hc_Memory const main_memory = {
 	/* id, description*/
 	"cpu", "Main",
@@ -167,16 +179,35 @@ hc_Memory const main_memory = {
 	NULL, 0,
 
 	/* peek */
-	[](uint64_t address) -> uint8_t {
-		return mem[address];
-	},
+	mem_peek,
 
 	/* poke */
-	[](uint64_t address, uint8_t value) -> int {
-		mem[address] = value;
-		return true;
-	},
+	mem_poke,
 };
+
+uint8_t prg_peek(uint64_t address)
+{
+	printf("prg_peek %04x\n", address);
+	uint8_t* data = prg;
+	return (data && address < nprg * PRGSZ)
+			? *(data + address)
+			: 0;
+}
+
+int prg_poke(uint64_t address, uint8_t value)
+{
+	printf("prg_poke %04x %02x\n", address, value);
+	uint8_t* data = prg;
+	if (data && address < nprg * PRGSZ)
+	{
+		*data = value;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 hc_Memory prg_rom = {
 	"rom", "prg ROM",
@@ -188,27 +219,23 @@ hc_Memory prg_rom = {
 	NULL, 0,
 
 	/* peek */
-	[](uint64_t address) -> uint8_t {
-		uint8_t* data = prg;
-		return (data && address < nprg * PRGSZ)
-			? *(data + address)
-			: 0;
-	},
+	prg_peek,
 
 	/* poke */
-	[](uint64_t address, uint8_t value) -> int {
-		uint8_t* data = prg;
-		if (data && address < nprg * PRGSZ)
-		{
-			*data = value;
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	},
+	prg_poke,
 };
+
+uint64_t get_register(unsigned reg)
+{
+	printf("get_register(%u)\n", reg);
+	return 0; // TODO
+}
+
+int set_register(unsigned reg, uint64_t value)
+{
+	printf("set_register(%u, %llu)\n", reg, value);
+	return true; // TODO
+}
 
 hc_Cpu const cpu = {
 	/* id, description, type, is_main */
@@ -218,14 +245,9 @@ hc_Cpu const cpu = {
 	/* break_points, num_break_points */
 	NULL, 0,
 	/* get_register */
-	// [](unsigned reg) -> uint64_t {
-	// 	return get_scripting_context().GetRegister(reg);
-	// },
+	get_register,
 	// /* set_register */
-	// [](unsigned reg, uint64_t value) -> int {
-	// 	get_scripting_context().SetRegister(reg, value);
-	// 	return true;
-	// },
+	set_register,
 };
 
 hc_Cpu const* cpus[] = {
@@ -247,18 +269,8 @@ hc_System const nes_system = {
 	NULL, 0
 };
 
-static RETRO_CALLCONV retro_proc_address_t get_proc_address(const char* sym)
-{
-	if (!strcmp(sym, "hc_set_debuggger") || !strcmp(sym, "hc_set_debugger"))
-	{
-		return (retro_proc_address_t)hc_set_debugger;
-	}
-	
-	return nullptr;
-}
-
 static RETRO_CALLCONV void* hc_set_debugger(hc_DebuggerIf* const debugger_if) {
-	debugger = debugger_if;
+	hc_DebuggerIf* debugger = debugger_if;
 	debugger_if->core_api_version = HC_API_VERSION;
 	debugger_if->v1.system = &nes_system;
 	// debugger_if->v1.subscribe = subscribe;
@@ -270,4 +282,14 @@ static RETRO_CALLCONV void* hc_set_debugger(hc_DebuggerIf* const debugger_if) {
 	// }
 
 	return (void*)&nes_system;
+}
+
+RETRO_CALLCONV retro_proc_address_t get_proc_address(const char* sym)
+{
+	if (!strcmp(sym, "hc_set_debuggger") || !strcmp(sym, "hc_set_debugger"))
+	{
+		return (retro_proc_address_t)hc_set_debugger;
+	}
+	
+	return NULL;
 }

@@ -79,7 +79,6 @@ hc_Memory prg_rom = {
 
 uint64_t get_register(unsigned reg)
 {
-	printf("get_register(%u)\n", reg);
 	switch (reg)
 	{
 	case HC_6502_A:
@@ -101,7 +100,6 @@ uint64_t get_register(unsigned reg)
 
 int set_register(unsigned reg, uint64_t value)
 {
-	printf("set_register(%u, %llu)\n", reg, value);
 	switch (reg)
 	{
 	case HC_6502_A:
@@ -123,7 +121,6 @@ int set_register(unsigned reg, uint64_t value)
 		rP = value;
 		break;
 	}
-// 		cpu->SetState(state);
 	return 1;
 }
 

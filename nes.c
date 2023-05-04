@@ -139,7 +139,25 @@ retro_load_game(const struct retro_game_info *game)
 		return false;
 
 	struct retro_get_proc_address_interface get_proc = { get_proc_address };
-	environ_cb(RETRO_ENVIRONMENT_SET_PROC_ADDRESS_CALLBACK, (void*)&get_proc);
+	if (!environ_cb(RETRO_ENVIRONMENT_SET_PROC_ADDRESS_CALLBACK, (void*)&get_proc))
+		return false;
+
+	struct retro_memory_descriptor descs[] = {
+		{
+			.ptr = mem,
+			.start = 0x0000,
+			.len = sizeof(mem),
+			.select = RETRO_MEMORY_SYSTEM_RAM,
+		},
+	};
+
+	struct retro_memory_map maps = {
+		.descriptors = descs,
+		.num_descriptors = 1,
+	};
+
+	if (!environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &maps))
+		return false;
 
 	struct retro_core_option_definition options[] = {
 		{

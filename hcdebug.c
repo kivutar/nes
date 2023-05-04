@@ -158,13 +158,11 @@ hc_SubscriptionID next_breakpoint_id()
 
 uint8_t mem_peek(uint64_t address)
 {
-	printf("mem_peek %04x\n", address);
 	return mem[address];
 }
 
 int mem_poke(uint64_t address, uint8_t value)
 {
-	printf("mem_poke %04x %02x\n", address, value);
 	mem[address] = value;
 	return true;
 }
@@ -187,7 +185,6 @@ hc_Memory const main_memory = {
 
 uint8_t prg_peek(uint64_t address)
 {
-	printf("prg_peek %04x\n", address);
 	uint8_t* data = prg;
 	return (data && address < nprg * PRGSZ)
 			? *(data + address)
@@ -196,7 +193,6 @@ uint8_t prg_peek(uint64_t address)
 
 int prg_poke(uint64_t address, uint8_t value)
 {
-	printf("prg_poke %04x %02x\n", address, value);
 	uint8_t* data = prg;
 	if (data && address < nprg * PRGSZ)
 	{

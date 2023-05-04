@@ -229,7 +229,7 @@ audiosample(void)
 	
 	if(sbufp == nil)
 		return;
-	d = 95.88 / (8128.0 / (0.01 + pulse(0) + pulse(1)) + 100);
+	d = 95.88 / (8128.0 / (pulse(0) + pulse(1)) + 100);
 	d += 159.79 / (1.0 / (tri()/8227.0 + noise()/12241.0 + dmc()/22638.0) + 100.0);
 	if(sbufp < sbuf + nelem(sbuf) - 1){
 		*sbufp++ = (d-0.5) * 32767;

@@ -139,8 +139,7 @@ retro_load_game(const struct retro_game_info *game)
 		return false;
 
 	struct retro_get_proc_address_interface get_proc = { get_proc_address };
-	if (!environ_cb(RETRO_ENVIRONMENT_SET_PROC_ADDRESS_CALLBACK, (void*)&get_proc))
-		return false;
+	environ_cb(RETRO_ENVIRONMENT_SET_PROC_ADDRESS_CALLBACK, (void*)&get_proc);
 
 	struct retro_memory_descriptor descs[] = {
 		{

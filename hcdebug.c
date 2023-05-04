@@ -9,152 +9,8 @@ extern int nprg;
 extern uchar *prg;
 extern uchar mem[32768];
 
-extern hc_Memory const main_memory;
-extern hc_Cpu const cpu;
-
-// class HCDebugContext : public ScriptingContext
-// {
-// public:
-// 	HCDebugContext(Debugger* d)
-// 		: ScriptingContext(d)
-// 	{}
-// protected:
-// 	void InternalCallMemoryCallback(uint16_t addr, uint8_t& value, CallbackType type) override
-// 	{
-// 		hc_Event e;
-// 		switch (type)
-// 		{
-// 		case CallbackType::CpuExec:
-// 			e.type = HC_EVENT_EXECUTION;
-// 			e.execution.cpu = &cpu;
-// 			e.execution.address = addr;
-// 			break;
-// 		case CallbackType::CpuWrite:
-// 		case CallbackType::CpuRead:
-// 			e.type = HC_EVENT_MEMORY;
-// 			e.memory.memory = &main_memory;
-// 			e.memory.address = addr;
-// 			e.memory.operation = (type == CallbackType::CpuRead)
-// 				? HC_MEMORY_READ
-// 				: HC_MEMORY_WRITE;
-// 			e.memory.value = value;
-// 			break;
-// 		default:
-// 			return;
-// 		}
-		
-// 		for (auto& ref : _callbacks[(int)type][addr])
-// 		{
-// 			if (debugger->v1.handle_event)
-// 			{
-// 				debugger->v1.handle_event(debugger->v1.user_data, ref, &e);
-// 			}
-// 		}
-// 	}
-	
-// 	int InternalCallEventCallback(EventType type) override
-// 	{
-// 		return 0;
-// 	}
-
-// public:
-// 	uint64_t GetRegister(unsigned reg)
-// 	{
-// 		State state;
-// 		_console->GetCpu()->GetState(state);
-// 		switch (reg)
-// 		{
-// 		case HC_6502_A:
-// 			return state.A;
-// 		case HC_6502_X:
-// 			return state.X;
-// 		case HC_6502_Y:
-// 			return state.Y;
-// 		case HC_6502_S:
-// 			return state.PS;
-// 		case HC_6502_PC:
-// 			return state.PC;
-// 		case HC_6502_P:
-// 			return state.SP;
-// 		default:
-// 			return 0;
-// 		}
-// 	}
-	
-// 	void SetRegister(unsigned reg, uint64_t value)
-// 	{
-// 		State state;
-// 		CPU* cpu = _console->GetCpu();
-// 		cpu->GetState(state);
-// 		switch (reg)
-// 		{
-// 		case HC_6502_A:
-// 			state.A = value;
-// 			break;
-// 		case HC_6502_X:
-// 			state.X =value;
-// 			break;
-// 		case HC_6502_Y:
-// 			state.Y = value;
-// 			break;
-// 		case HC_6502_S:
-// 			state.PS = value;
-// 			break;
-// 		case HC_6502_PC:
-// 			cpu->SetDebugPC(value);
-// 			return;
-// 		case HC_6502_P:
-// 			state.SP = value;
-// 			break;
-// 		}
-// 		cpu->SetState(state);
-// 	}
-	
-// 	uint8_t peek(uint64_t address)
-// 	{
-// 		return _console->GetMemoryManager()->DebugRead(address);
-// 	}
-	
-// 	void poke(uint64_t address, uint8_t value)
-// 	{
-// 		_console->GetMemoryManager()->DebugWrite(address, value);
-// 	}
-	
-// 	void step()
-// 	{
-// 		GetDebugger()->ReadStepContext();
-// 		GetDebugger()->Step();
-// 	}
-	
-// 	void step_over()
-// 	{
-// 		GetDebugger()->ReadStepContext();
-// 		GetDebugger()->StepOver();
-// 	}
-	
-// 	void step_out()
-// 	{
-// 		GetDebugger()->ReadStepContext();
-// 		GetDebugger()->StepOut();
-// 	}
-// };
-
-// HCDebugContext& get_scripting_context()
-// {
-// 	static shared_ptr<HCDebugContext> context;
-// 	if (context) return *context;
-// 	shared_ptr<Debugger> debugger = _console->GetDebugger();
-// 	context.reset(new HCDebugContext(debugger.get()));
-// 	debugger->AttachScript(context);
-// 	return *context;
-// }
-
-static hc_SubscriptionID breakpoint_id = 0;
-
-hc_SubscriptionID next_breakpoint_id()
-{
-	return breakpoint_id = (breakpoint_id + 1) & ~(1ULL << 63ULL);
-}
+extern u16int pc;
+extern u8int rA, rX, rY, rS, rP;
 
 uint8_t mem_peek(uint64_t address)
 {
@@ -224,13 +80,51 @@ hc_Memory prg_rom = {
 uint64_t get_register(unsigned reg)
 {
 	printf("get_register(%u)\n", reg);
-	return 0; // TODO
+	switch (reg)
+	{
+	case HC_6502_A:
+		return rA;
+	case HC_6502_X:
+		return rX;
+	case HC_6502_Y:
+		return rY;
+	case HC_6502_S:
+		return rS;
+	case HC_6502_PC:
+		return pc;
+	case HC_6502_P:
+		return rP;
+	default:
+		return 0;
+	}
 }
 
 int set_register(unsigned reg, uint64_t value)
 {
 	printf("set_register(%u, %llu)\n", reg, value);
-	return true; // TODO
+	switch (reg)
+	{
+	case HC_6502_A:
+		rA = value;
+		break;
+	case HC_6502_X:
+		rX =value;
+		break;
+	case HC_6502_Y:
+		rY = value;
+		break;
+	case HC_6502_S:
+		rS = value;
+		break;
+	case HC_6502_PC:
+		pc = value;
+		return 1;
+	case HC_6502_P:
+		rP = value;
+		break;
+	}
+// 		cpu->SetState(state);
+	return 1;
 }
 
 hc_Cpu const cpu = {

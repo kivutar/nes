@@ -16,11 +16,11 @@ static retro_environment_t environ_cb;
 retro_audio_sample_batch_t audio_cb;
 
 extern uchar ppuram[16384];
-int nprg, nchr, map, chrram;
+int nprg, nchr, map, chrram = 0;
 uchar *prg, *chr;
 int cpuclock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock, msgclock, saveclock = 0;
-int oflag, savefd = -1;
-int mirr;
+int savefd = -1;
+int mirr = MHORZ;
 int doflush = 0;
 uchar *pic;
 u8int keys[4];
@@ -305,12 +305,13 @@ retro_reset(void)
 size_t
 retro_serialize_size(void)
 {
-	return (32+16)*1024+256+46*8;
+	return (32+16)*1024+256+46+13;
 }
 
 bool
 retro_serialize(void *data, size_t size)
 {
+	memset(data, 0, size);
 	return savestate(data, size);
 }
 

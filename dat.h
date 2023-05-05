@@ -7,7 +7,7 @@ extern u8int ppusx, vrambuf;
 extern int mirr, ppux, ppuy, odd, vramlatch;
 extern u32int keylatch[2];
 
-extern int map, mmc3hack, oflag;
+extern int map, mmc3hack;
 extern uchar *prg, *chr;
 extern int nprg, nchr, map, chrram;
 

@@ -4,16 +4,16 @@
 #include "dat.h"
 #include "fns.h"
 
-uchar mem[32768];
-uchar ppuram[16384];
-uchar oam[256];
+uchar mem[32768] = {0};
+uchar ppuram[16384] = {0};
+uchar oam[256] = {0};
 uchar *prgb[16], *chrb[16];
-u16int pput, ppuv;
-u8int ppusx, vrambuf;
+u16int pput, ppuv = 0;
+u8int ppusx, vrambuf = 0;
 u32int keylatch[2] = {0xFFFFFFFF, 0xFFFFFFFF};
 int fourscore = 1;
 int vramlatch = 1;
-int prgsh, chrsh, mmc3hack;
+int prgsh, chrsh, mmc3hack = 0;
 extern u8int keys[4];
 
 static void

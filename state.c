@@ -77,6 +77,7 @@ loadstate(const void *data, size_t size)
 	rY = get8();
 	rS = get8();
 	rP = get8();
+	irq = get8();
 	nmi = get8();
 	pc = get16();
 	pput = get16();
@@ -117,6 +118,7 @@ savestate(void *data, size_t size)
 	put8(rY);
 	put8(rS);
 	put8(rP);
+	put8(irq);
 	put8(nmi);
 	put16(pc);
 	put16(pput);

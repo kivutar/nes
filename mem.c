@@ -514,9 +514,6 @@ memwrite(u16int p, u8int v)
 				irq &= ~IRQFRAME;
 			break;
 		}
-	}else if(p < 0x8000){
-		if(saveclock == 0)
-			saveclock = SAVEFREQ;
 	}else{
 		if(mapper[map] != nil)
 			mapper[map](p, v);

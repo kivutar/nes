@@ -14,7 +14,7 @@ extern int nprg, nchr, map, chrram;
 extern u8int apuseq, apuctr[13];
 extern u16int dmcaddr, dmccnt;
 
-extern int cpuclock, ppuclock, apuclock, dmcclock, dmcfreq, saveclock;
+extern int cpuclock, ppuclock, apuclock, dmcclock, sampclock, dmcfreq;
 
 extern void (*mapper[])(int, u8int);
 
@@ -82,7 +82,6 @@ enum {
 	APUDIV = 89490,
 	RATE = 44100,
 	SAMPDIV = FREQ / RATE,
-	SAVEFREQ = FREQ/5,
 };
 
 enum {

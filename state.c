@@ -96,6 +96,7 @@ loadstate(const void *data, size_t size)
 	apuseq = get8();
 	dmcaddr = get16();
 	dmccnt = get16();
+	dmcfreq = get16();
 	memcpy(apuctr, addr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](RSTR, 0);
 	return true;
@@ -132,9 +133,12 @@ savestate(void *data, size_t size)
 	put32(cpuclock);
 	put32(ppuclock);
 	put32(apuclock);
+	put32(dmcclock);
+	put32(sampclock);
 	put8(apuseq);
 	put16(dmcaddr);
 	put16(dmccnt);
+	put16(dmcfreq);
 	memcpy(addr, apuctr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](SAVE, 0);
 	return true;

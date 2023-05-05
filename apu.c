@@ -6,7 +6,7 @@
 #include "dat.h"
 #include "fns.h"
 
-enum { MAXBUF = 2000 };
+#define MAXBUF 4000
 
 enum {
 	LEN = 0,
@@ -19,7 +19,8 @@ enum {
 };
 u8int apuseq, apuctr[13];
 u16int dmcaddr, dmccnt;
-static short sbuf[2*MAXBUF], *sbufp;
+static short sbuf[MAXBUF] = {0};
+static short *sbufp = nil;
 
 int
 targperiod(int i)
@@ -226,15 +227,11 @@ void
 audiosample(void)
 {
 	double d;
-	
-	if(sbufp == nil)
-		return;
-	d = 95.88 / (8128.0 / (pulse(0) + pulse(1)) + 100);
+	d = 95.88 / (8128.0 / (pulse(0) + pulse(1)) + 100.0);
 	d += 159.79 / (1.0 / (tri()/8227.0 + noise()/12241.0 + dmc()/22638.0) + 100.0);
-	if(sbufp < sbuf + nelem(sbuf) - 1){
-		*sbufp++ = (d-0.5) * 32767;
-		*sbufp++ = (d-0.5) * 32767;
-	}
+
+	*sbufp++ = (d-0.5) * 32767;
+	*sbufp++ = (d-0.5) * 32767;
 }
 
 void
@@ -276,10 +273,6 @@ extern retro_audio_sample_batch_t audio_cb;
 int
 audioout(void)
 {
-	if(sbufp == nil)
-		return -1;
-	if(sbufp == sbuf)
-		return 0;
 	audio_cb(sbuf, (sbufp - sbuf) / 2);
 	sbufp = sbuf;
 	return 0;

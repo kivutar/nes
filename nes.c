@@ -38,9 +38,8 @@ void
 loadrom(const void *data)
 {
 	int nes20;
-	static uchar header[16];
-	static u32int flags;
-	static char buf[512];
+	uchar header[16];
+	u32int flags;
 
 	memcpy(header, data, sizeof(header));
 	if(memcmp(header, "NES\x1a", 4) != 0)

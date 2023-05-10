@@ -514,6 +514,7 @@ memwrite(u16int p, u8int v)
 				irq &= ~IRQFRAME;
 			break;
 		}
+	}else if(p < 0x8000){
 	}else{
 		if(mapper[map] != nil)
 			mapper[map](p, v);

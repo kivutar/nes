@@ -94,6 +94,8 @@ loadstate(const void *data, size_t size)
 	cpuclock = get32();
 	ppuclock = get32();
 	apuclock = get32();
+	dmcclock = get32();
+	sampclock = get32();
 	apuseq = get8();
 	dmcaddr = get16();
 	dmccnt = get16();

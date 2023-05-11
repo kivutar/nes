@@ -77,6 +77,7 @@ loadstate(const void *data, size_t size)
 	rY = get8();
 	rS = get8();
 	rP = get8();
+	irq = get8();
 	nmi = get8();
 	pc = get16();
 	pput = get16();
@@ -96,6 +97,7 @@ loadstate(const void *data, size_t size)
 	apuseq = get8();
 	dmcaddr = get16();
 	dmccnt = get16();
+	dmcfreq = get16();
 	memcpy(apuctr, addr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](RSTR, 0);
 	return true;
@@ -116,6 +118,7 @@ savestate(void *data, size_t size)
 	put8(rY);
 	put8(rS);
 	put8(rP);
+	put8(irq);
 	put8(nmi);
 	put16(pc);
 	put16(pput);
@@ -132,9 +135,12 @@ savestate(void *data, size_t size)
 	put32(cpuclock);
 	put32(ppuclock);
 	put32(apuclock);
+	put32(dmcclock);
+	put32(sampclock);
 	put8(apuseq);
 	put16(dmcaddr);
 	put16(dmccnt);
+	put16(dmcfreq);
 	memcpy(addr, apuctr, sizeof(apuctr)); addr += sizeof(apuctr);
 	mapper[map](SAVE, 0);
 	return true;

@@ -17,8 +17,8 @@ enum {
 	DMCCTR = 11,
 	DMCSHFT = 12,
 };
-u8int apuseq, apuctr[13];
-u16int dmcaddr, dmccnt;
+u8int apuseq, apuctr[13] = {0};
+u16int dmcaddr, dmccnt = 0;
 static short sbuf[MAXBUF] = {0};
 static short *sbufp = nil;
 

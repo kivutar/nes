@@ -16,23 +16,15 @@ static retro_environment_t environ_cb;
 retro_audio_sample_batch_t audio_cb;
 
 extern uchar ppuram[16384];
-int nprg, nchr, map, chrram;
+int nprg, nchr, map, chrram = 0;
 uchar *prg, *chr;
-int cpuclock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock, msgclock, saveclock = 0;
-int oflag, savefd = -1;
-int mirr;
+int cpuclock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock = 0;
+int savefd = -1;
+int mirr = MHORZ;
 int doflush = 0;
 uchar *pic;
 u8int keys[4];
 extern int fourscore;
-
-void
-flushram(void)
-{
-	//if(savefd >= 0)
-	//	pwrite(savefd, mem + 0x6000, 0x2000, 0);
-	saveclock = 0;
-}
 
 void
 loadrom(const void *data)
@@ -243,11 +235,6 @@ retro_run(void)
 			dmcstep();
 			dmcclock -= dmcfreq;
 		}
-		if(saveclock > 0){
-			saveclock -= t;
-			if(saveclock <= 0)
-				flushram();
-		}
 	}
 	video_cb(pic, 256, 240, 256*4);
 	audioout();
@@ -293,7 +280,7 @@ retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 void
 retro_reset(void)
 {
-	cpuclock = ppuclock = apuclock = dmcclock = sampclock = msgclock = saveclock = 0;
+	cpuclock = ppuclock = apuclock = dmcclock = sampclock = 0;
 	doflush = 0;
 	keys[0] = keys[1] = keys[2] = keys[3] = 0;
 	initaudio();
@@ -305,12 +292,13 @@ retro_reset(void)
 size_t
 retro_serialize_size(void)
 {
-	return (32+16)*1024+256+46*8;
+	return (32+16)*1024+256+57+13;
 }
 
 bool
 retro_serialize(void *data, size_t size)
 {
+	memset(data, 0, size);
 	return savestate(data, size);
 }
 

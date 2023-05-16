@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <unistd.h>
 #include "libretro.h"
 #include "u.h"
 #include "compat.h"

@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include "u.h"
 #include "compat.h"
 

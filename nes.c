@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,17 +57,17 @@ loadrom(const void *data)
 
 	memset(mem, 0, sizeof(mem));
 	if((flags & FLTRAINER) != 0)
-		memcpy(mem + 0x7000, data+sizeof(header), 512);
+		memcpy(mem + 0x7000, (u8int*)(data)+sizeof(header), 512);
 	prg = malloc(nprg * PRGSZ);
 	if(prg == nil)
 		sysfatal("malloc");
-	memcpy(prg, data+sizeof(header), nprg * PRGSZ);
+	memcpy(prg, (u8int*)(data)+sizeof(header), nprg * PRGSZ);
 	chrram = nchr == 0;
 	if(nchr != 0){
 		chr = malloc(nchr * CHRSZ);
 		if(chr == nil)
 			sysfatal("malloc");
-		memcpy(chr, data+sizeof(header)+(nprg * PRGSZ), nchr * CHRSZ);
+		memcpy(chr, (u8int*)(data)+sizeof(header)+(nprg * PRGSZ), nchr * CHRSZ);
 	}else{
 		nchr = 1;
 		chr = malloc(nchr * CHRSZ);

@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
 #include "u.h"
@@ -7,12 +6,12 @@
 #include "dat.h"
 #include "fns.h"
 
-static void* addr;
+static u8int* addr;
 
 void
 put8(u8int i)
 {
-	*(u8int*)addr = i; addr += 1;
+	*addr = i; addr += 1;
 }
 
 void

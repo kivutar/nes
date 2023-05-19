@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +21,7 @@ int cpuclock, ppuclock, apuclock, dmcclock, dmcfreq, sampclock = 0;
 int savefd = -1;
 int mirr = MHORZ;
 int doflush = 0;
-uchar *pic;
+uchar pic[256 * 240 * 4] = { 0 };
 u8int keys[4];
 extern int fourscore;
 
@@ -58,20 +57,20 @@ loadrom(const void *data)
 
 	memset(mem, 0, sizeof(mem));
 	if((flags & FLTRAINER) != 0)
-		memcpy(mem + 0x7000, data+sizeof(header), 512);
-	prg = malloc(nprg * PRGSZ);
+		memcpy(mem + 0x7000, (u8int*)(data)+sizeof(header), 512);
+	prg = (uchar*)malloc(nprg * PRGSZ);
 	if(prg == nil)
 		sysfatal("malloc");
-	memcpy(prg, data+sizeof(header), nprg * PRGSZ);
+	memcpy(prg, (u8int*)(data)+sizeof(header), nprg * PRGSZ);
 	chrram = nchr == 0;
 	if(nchr != 0){
-		chr = malloc(nchr * CHRSZ);
+		chr = (uchar*)malloc(nchr * CHRSZ);
 		if(chr == nil)
 			sysfatal("malloc");
-		memcpy(chr, data+sizeof(header)+(nprg * PRGSZ), nchr * CHRSZ);
+		memcpy(chr, (u8int*)(data)+sizeof(header)+(nprg * PRGSZ), nchr * CHRSZ);
 	}else{
 		nchr = 1;
-		chr = malloc(nchr * CHRSZ);
+		chr = (uchar*)malloc(nchr * CHRSZ);
 		if(chr == nil)
 			sysfatal("malloc");
 	}
@@ -171,9 +170,8 @@ retro_load_game(const struct retro_game_info *game)
 	if (!environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var_fourscore))
 		return false;
 
-	fourscore = strcmp(var_fourscore.value, "true") == 0;
+	fourscore = var_fourscore.value != NULL && strcmp(var_fourscore.value, "true") == 0;
 
-	pic = malloc(256 * 240 * 4);
 	initaudio();
 	loadrom(game->data);
 	pc = memread(0xFFFC) | memread(0xFFFD) << 8;
@@ -280,6 +278,7 @@ retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 void
 retro_reset(void)
 {
+	memset(pic, 0, sizeof(pic));
 	cpuclock = ppuclock = apuclock = dmcclock = sampclock = 0;
 	doflush = 0;
 	keys[0] = keys[1] = keys[2] = keys[3] = 0;

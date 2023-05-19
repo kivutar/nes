@@ -3,7 +3,7 @@
 #include "dat.h"
 #include "fns.h"
 
-extern uchar *pic;
+extern uchar pic[256*240*4];
 int ppuy, ppux, odd;
 
 static void
